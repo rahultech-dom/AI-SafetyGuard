@@ -59,6 +59,12 @@ def download_youtube_video(url: str, output_dir: Optional[Path] = None) -> Dict[
         "noplaylist": True,
         "quiet": True,
         "no_warnings": True,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["android", "web"],
+                "player_skip": ["webpage", "configs"],
+            }
+        },
     }
 
     try:
