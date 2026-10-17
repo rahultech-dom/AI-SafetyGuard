@@ -61,12 +61,11 @@ def download_youtube_video(url: str, output_dir: Optional[Path] = None) -> Dict[
         "no_warnings": True,
         "extractor_args": {
             "youtube": {
-                "player_client": ["android", "ios", "mweb", "web"],
-                "player_skip": ["webpage", "configs"],
+                "player_client": ["android", "ios", "web"],
             }
         },
         "http_headers": {
-            "User-Agent": "com.google.android.youtube/19.09.37 (Linux; U; Android 14; US) gzip",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
             "Accept-Language": "en-US,en;q=0.9",
         },
     }
