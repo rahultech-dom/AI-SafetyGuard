@@ -1,0 +1,31 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Large binaries & media cache
+*.mp4
+*.avi
+*.mov
+*.wav
+*.webm
+!data/videos/test_walk.mp4
+
+# Environment & local settings
+.env
+.env.local
+.DS_Store
+Thumbs.db
+
+# Transient job artifacts
+outputs/jobs/
+outputs/*_motion_features.csv
+outputs/*_window_features.csv
+

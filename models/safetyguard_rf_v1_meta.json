@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "classifier_type": "random_forest",
+  "trained_at": "2026-10-17T18:41:58.244895",
+  "n_samples": 990,
+  "n_features": 13,
+  "feature_columns": [
+    "motion_mean",
+    "motion_std",
+    "motion_max",
+    "motion_min",
+    "motion_p90",
+    "motion_jerk_mean",
+    "spatial_concentration",
+    "directional_variance",
+    "audio_rms",
+    "spectral_centroid",
+    "high_freq_ratio",
+    "audio_energy_spike",
+    "distress_keyword_count"
+  ],
+  "calibrated_threshold": 0.3,
+  "validation_f1_calibrated": 1.0
+}

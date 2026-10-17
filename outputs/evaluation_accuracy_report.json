@@ -1,0 +1,290 @@
+{
+  "evaluation_timestamp": "2026-10-17 19:07:10",
+  "model_version": "AI-SafetyGuard v1.2 (Farneback + SceneCut + Multimodal RF)",
+  "overall_metrics": {
+    "total_samples": 12,
+    "true_positives": 5,
+    "true_negatives": 7,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "accuracy": 100.0,
+    "precision": 100.0,
+    "recall_sensitivity": 100.0,
+    "specificity": 100.0,
+    "f1_score": 100.0,
+    "false_alarm_rate": 0.0
+  },
+  "cctv_metrics": {
+    "total_samples": 4,
+    "true_positives": 2,
+    "true_negatives": 2,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "accuracy": 100.0,
+    "precision": 100.0,
+    "recall_sensitivity": 100.0,
+    "specificity": 100.0,
+    "f1_score": 100.0,
+    "false_alarm_rate": 0.0
+  },
+  "real_world_metrics": {
+    "total_samples": 8,
+    "true_positives": 3,
+    "true_negatives": 5,
+    "false_positives": 0,
+    "false_negatives": 0,
+    "accuracy": 100.0,
+    "precision": 100.0,
+    "recall_sensitivity": 100.0,
+    "specificity": 100.0,
+    "f1_score": 100.0,
+    "false_alarm_rate": 0.0
+  },
+  "test_results": [
+    {
+      "case_id": "CCTV-01",
+      "case_name": "Store Checkout Counter",
+      "category": "CCTV Footage",
+      "filename": "cctv_normal_store_counter.mp4",
+      "duration_seconds": 8.0,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 0.53,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "CCTV-02",
+      "case_name": "Hallway Corridor Patrol",
+      "category": "CCTV Footage",
+      "filename": "cctv_normal_hallway_patrol.mp4",
+      "duration_seconds": 8.0,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 0.5,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "CCTV-03",
+      "case_name": "Parking Lot Altercation Brawl",
+      "category": "CCTV Footage",
+      "filename": "cctv_crime_altercation_brawl.mp4",
+      "duration_seconds": 10.0,
+      "ground_truth": 1,
+      "predicted": 1,
+      "outcome": "TP",
+      "incident_count": 2,
+      "high_priority_count": 0,
+      "medium_priority_count": 2,
+      "processing_seconds": 0.6,
+      "incidents_detected": [
+        {
+          "severity": "medium",
+          "interval": "3.0s - 5.0s",
+          "reasons": [
+            "CCTV physical brawl/altercation (jerk=0.51, motion=0.86)",
+            "CCTV physical brawl/altercation (jerk=0.45, motion=0.76)"
+          ]
+        },
+        {
+          "severity": "medium",
+          "interval": "8.0s - 9.0s",
+          "reasons": [
+            "Sudden fall and collapse detected (person stationary after impact)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "CCTV-04",
+      "case_name": "Stairwell Slip & Fall",
+      "category": "CCTV Footage",
+      "filename": "cctv_crime_slip_fall.mp4",
+      "duration_seconds": 8.0,
+      "ground_truth": 1,
+      "predicted": 1,
+      "outcome": "TP",
+      "incident_count": 1,
+      "high_priority_count": 0,
+      "medium_priority_count": 1,
+      "processing_seconds": 0.5,
+      "incidents_detected": [
+        {
+          "severity": "medium",
+          "interval": "5.0s - 6.0s",
+          "reasons": [
+            "Sudden fall and collapse detected (person stationary after impact)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "REAL-01",
+      "case_name": "Crime Patrol Viral Fight Scene",
+      "category": "Real-World Altercation",
+      "filename": "Crime Patrol Most Viral Video #crimepatrol #crime  #police #youtubeshorts #viral_fDKOGf6RtWI.mp4",
+      "duration_seconds": 15.2,
+      "ground_truth": 1,
+      "predicted": 1,
+      "outcome": "TP",
+      "incident_count": 1,
+      "high_priority_count": 0,
+      "medium_priority_count": 1,
+      "processing_seconds": 2.86,
+      "incidents_detected": [
+        {
+          "severity": "medium",
+          "interval": "13.0s - 15.0s",
+          "reasons": [
+            "Violent physical struggle motion (jerk=3.30, motion=10.50)",
+            "Violent physical struggle motion (jerk=3.40, motion=7.72)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "REAL-02",
+      "case_name": "Coffee Shop Criminal Altercation",
+      "category": "Real-World Altercation",
+      "filename": "Lio Vs Five Criminal Fight Scene in Coffee Shop \uff5c Lio Movie \uff5c Anthony Movie \uff5c Th_iPyP2jWI5VM.mp4",
+      "duration_seconds": 56.27,
+      "ground_truth": 1,
+      "predicted": 1,
+      "outcome": "TP",
+      "incident_count": 2,
+      "high_priority_count": 0,
+      "medium_priority_count": 2,
+      "processing_seconds": 7.11,
+      "incidents_detected": [
+        {
+          "severity": "medium",
+          "interval": "9.0s - 10.0s",
+          "reasons": [
+            "Sudden fall and collapse detected (person stationary after impact)"
+          ]
+        },
+        {
+          "severity": "medium",
+          "interval": "29.0s - 30.0s",
+          "reasons": [
+            "Sudden fall and collapse detected (person stationary after impact)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "REAL-03",
+      "case_name": "Action Fight Sequence",
+      "category": "Real-World Altercation",
+      "filename": "Alia Bhatt\u2019s SAVAGE Move Leaves Her Opponent SHOCKED #Jigra \ud83d\udd25_k3mwhRslDTE.mp4",
+      "duration_seconds": 53.35,
+      "ground_truth": 1,
+      "predicted": 1,
+      "outcome": "TP",
+      "incident_count": 2,
+      "high_priority_count": 1,
+      "medium_priority_count": 1,
+      "processing_seconds": 8.06,
+      "incidents_detected": [
+        {
+          "severity": "high",
+          "interval": "44.0s - 46.0s",
+          "reasons": [
+            "Violent physical struggle motion (jerk=6.62, motion=7.28)",
+            "Sustained high-intensity physical altercation",
+            "Violent physical struggle motion (jerk=4.49, motion=10.11)"
+          ]
+        },
+        {
+          "severity": "medium",
+          "interval": "53.0s - 54.0s",
+          "reasons": [
+            "Sudden fall and collapse detected (person stationary after impact)"
+          ]
+        }
+      ]
+    },
+    {
+      "case_id": "REAL-04",
+      "case_name": "Pedestrian Walk Normal",
+      "category": "Real-World Normal",
+      "filename": "test_walk.mp4",
+      "duration_seconds": 5.0,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 0.33,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "REAL-05",
+      "case_name": "Car Fueling Monologue Vlog",
+      "category": "Real-World Normal",
+      "filename": "Here\u2019s how much a Brabus G63 costs to fuel up #brabus_UEeV4Tjc-1M.mp4",
+      "duration_seconds": 21.42,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 4.09,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "REAL-06",
+      "case_name": "Guru Randhawa Music Dance Video",
+      "category": "Real-World Normal",
+      "filename": "GURU RANDHAWA - FOSHO Song \uff5c Bts Video #gururandhawa #fosho #song #newsong #danc_LzgJubF6i_w.mp4",
+      "duration_seconds": 31.32,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 5.46,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "REAL-07",
+      "case_name": "Dance Short Choreography",
+      "category": "Real-World Normal",
+      "filename": "\ud83d\udc49 Zero Figure vs Curvy Beauty \ud83d\udd25 #shorts #viral #trending #shortsfeed_0AuBRz8iIvY.mp4",
+      "duration_seconds": 18.2,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 3.2,
+      "incidents_detected": []
+    },
+    {
+      "case_id": "REAL-08",
+      "case_name": "Stand-up Comedy & Dialogue",
+      "category": "Real-World Normal",
+      "filename": "Nishant Tanwar Core Is Pure Chaos \ud83d\udc80\ud83d\ude02\uff5c Samay Latent_J5UcKr_hJI4.mp4",
+      "duration_seconds": 59.88,
+      "ground_truth": 0,
+      "predicted": 0,
+      "outcome": "TN",
+      "incident_count": 0,
+      "high_priority_count": 0,
+      "medium_priority_count": 0,
+      "processing_seconds": 3.92,
+      "incidents_detected": []
+    }
+  ]
+}
