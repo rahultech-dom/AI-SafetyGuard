@@ -1,0 +1,2 @@
+/api/*  https://tangy-cats-think.loca.lt/api/:splat  200!
+/*      /index.html                                 200

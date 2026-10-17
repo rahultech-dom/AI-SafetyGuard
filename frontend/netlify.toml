@@ -1,0 +1,17 @@
+[[headers]]
+  for = "/*"
+    [headers.values]
+    Access-Control-Allow-Origin = "*"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://tangy-cats-think.loca.lt/api/:splat"
+  status = 200
+  force = true
+  [redirects.headers]
+    Bypass-Tunnel-Reminder = "true"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
