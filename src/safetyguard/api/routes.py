@@ -214,7 +214,7 @@ def analyze_sample_video(req: SampleAnalyzeRequest) -> Dict[str, Any]:
 @router.post("/analyze/url", status_code=status.HTTP_202_ACCEPTED)
 def analyze_video_url(req: URLAnalyzeRequest) -> Dict[str, Any]:
     """
-    Queue analysis from either a direct web video stream (MP4/WebM/etc) or YouTube URL.
+    Queue analysis for a direct web video stream (MP4/WebM/etc).
     """
     url = req.url.strip()
     if not url:
@@ -222,6 +222,14 @@ def analyze_video_url(req: URLAnalyzeRequest) -> Dict[str, Any]:
 
     if not url.startswith("http://") and not url.startswith("https://"):
         raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+
+    # Reject YouTube URLs cleanly with helpful direction
+    lower_url = url.lower()
+    if "youtube.com" in lower_url or "youtu.be" in lower_url:
+        raise HTTPException(
+            status_code=400,
+            detail="YouTube URL extraction is disabled on cloud deployments due to YouTube bot prevention policies. Please use Local Video File Upload or the 1-Click CCTV Scenarios.",
+        )
 
     job_id = job_manager.create_job(job_type="url", source_path_or_url=url)
     job_manager.start_analysis_job(job_id)
@@ -234,12 +242,15 @@ def analyze_video_url(req: URLAnalyzeRequest) -> Dict[str, Any]:
     }
 
 
-@router.post("/analyze/youtube", status_code=status.HTTP_202_ACCEPTED)
+@router.post("/analyze/youtube", status_code=status.HTTP_400_BAD_REQUEST)
 def analyze_youtube_video(req: YouTubeAnalyzeRequest) -> Dict[str, Any]:
     """
-    Backward-compatible YouTube endpoint that routes into the universal URL pipeline.
+    Deprecated YouTube endpoint with direct guidance.
     """
-    return analyze_video_url(URLAnalyzeRequest(url=req.url))
+    raise HTTPException(
+        status_code=400,
+        detail="YouTube URL extraction is disabled on cloud deployments due to YouTube bot prevention policies. Please use Local Video File Upload or the 1-Click CCTV Scenarios.",
+    )
 
 
 @router.get("/jobs")

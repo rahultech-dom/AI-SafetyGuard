@@ -11,21 +11,19 @@ import {
   Info,
   Zap,
   ShieldCheck,
-  ShieldAlert,
-  Film
+  ShieldAlert
 } from 'lucide-react'
 
 export default function VideoInputView({
   onStartUpload,
   onStartURL,
   onStartSample,
-  onStartYouTube,
   activeJob,
   isLoading,
   error,
   onClearError
 }) {
-  const [activeTab, setActiveTab] = useState('samples') // 'samples' | 'url' | 'upload'
+  const [activeTab, setActiveTab] = useState('samples') // 'samples' | 'upload' | 'url'
   const [selectedFile, setSelectedFile] = useState(null)
   const [fileError, setFileError] = useState('')
   const [videoUrl, setVideoUrl] = useState('')
@@ -80,15 +78,15 @@ export default function VideoInputView({
 
   const sampleUrlPresets = [
     {
-      label: 'CCTV Brawl Stream (MP4)',
+      label: 'CCTV Brawl Stream (.mp4)',
       url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_crime_altercation_brawl.mp4'
     },
     {
-      label: 'CCTV Slip & Fall Stream (MP4)',
+      label: 'CCTV Slip & Fall Stream (.mp4)',
       url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_crime_slip_fall.mp4'
     },
     {
-      label: 'CCTV Safe Patrol Stream (MP4)',
+      label: 'CCTV Safe Patrol Stream (.mp4)',
       url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_normal_hallway_patrol.mp4'
     }
   ]
@@ -142,14 +140,17 @@ export default function VideoInputView({
       }
       onStartUpload(selectedFile)
     } else if (activeTab === 'url') {
-      if (!videoUrl.trim()) {
-        setFileError('Please enter a video or YouTube stream URL.')
+      const clean = videoUrl.trim()
+      if (!clean) {
+        setFileError('Please enter a direct video URL (.mp4, .webm).')
+        return
+      }
+      if (clean.includes('youtube.com') || clean.includes('youtu.be')) {
+        setFileError('YouTube links are not supported due to YouTube bot restrictions on cloud servers. Please use 1-Click CCTV Scenarios or upload your video file directly.')
         return
       }
       if (onStartURL) {
-        onStartURL(videoUrl.trim())
-      } else if (onStartYouTube) {
-        onStartYouTube(videoUrl.trim())
+        onStartURL(clean)
       }
     }
   }
@@ -232,18 +233,18 @@ export default function VideoInputView({
             1-Click CCTV Scenarios (Instant Demo)
           </button>
           <button
-            className={`input-tab-btn ${activeTab === 'url' ? 'active' : ''}`}
-            onClick={() => setActiveTab('url')}
-          >
-            <Globe size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
-            Web Video / Stream URL
-          </button>
-          <button
             className={`input-tab-btn ${activeTab === 'upload' ? 'active' : ''}`}
             onClick={() => setActiveTab('upload')}
           >
             <UploadCloud size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
             Local Video File Upload
+          </button>
+          <button
+            className={`input-tab-btn ${activeTab === 'url' ? 'active' : ''}`}
+            onClick={() => setActiveTab('url')}
+          >
+            <Globe size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
+            Direct Video Stream URL (.mp4)
           </button>
         </div>
 
@@ -278,7 +279,7 @@ export default function VideoInputView({
               marginBottom: '1rem',
               lineHeight: 1.5
             }}>
-              Select any pre-configured real-world CCTV benchmark clip below for an <strong>instant end-to-end demonstration</strong> of multimodal threat screening, dense optical flow tracking, and AI incident scoring. Works 100% reliably on all deployments.
+              Select any pre-loaded real-world CCTV benchmark clip below for an <strong>instant end-to-end demonstration</strong> of multimodal threat screening, dense optical flow tracking, and AI incident scoring. Works 100% reliably on any device or cloud host.
             </div>
 
             <div style={{
@@ -367,92 +368,7 @@ export default function VideoInputView({
           </div>
         )}
 
-        {/* Mode 2: Universal Web Video / Stream URL */}
-        {activeTab === 'url' && (
-          <div>
-            <div style={{
-              backgroundColor: '#eff6ff',
-              border: '1px solid #bfdbfe',
-              color: '#1e40af',
-              padding: '0.85rem 1rem',
-              borderRadius: 'var(--radius-sm)',
-              marginBottom: '1rem',
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: '10px',
-              fontSize: '0.82rem',
-              lineHeight: '1.5'
-            }}>
-              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
-              <div>
-                <strong>Universal Video Stream Support:</strong> Paste any direct video stream URL (<code>.mp4</code>, <code>.webm</code>, raw GitHub, AWS S3, Cloudflare, CDN, or surveillance stream) or a public YouTube link. Direct video streams download universally across all cloud servers with zero bot restrictions.
-              </div>
-            </div>
-
-            <div className="url-input-group">
-              <input
-                type="url"
-                className="url-input"
-                placeholder="https://example.com/cctv_footage.mp4 or https://www.youtube.com/watch?v=..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-              />
-            </div>
-
-            {/* Quick Presets */}
-            <div style={{ marginTop: '0.75rem' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px' }}>
-                Quick Fill Stream Links:
-              </span>
-              <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
-                {sampleUrlPresets.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    style={{
-                      fontSize: '0.75rem',
-                      padding: '3px 8px',
-                      background: 'var(--bg-main)',
-                      border: '1px solid var(--border-color)',
-                      borderRadius: '4px',
-                      color: 'var(--primary)',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => setVideoUrl(preset.url)}
-                  >
-                    {preset.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-              Supported stream formats: Direct MP4, WebM, MKV, AVI, and standard YouTube video links.
-            </div>
-
-            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-              <button
-                className="primary-btn"
-                disabled={isLoading || isJobRunning}
-                onClick={handleStartAnalysis}
-              >
-                {isLoading || isJobRunning ? (
-                  <>
-                    <Loader2 size={16} className="animate-spin" />
-                    Processing Pipeline...
-                  </>
-                ) : (
-                  <>
-                    <Play size={16} />
-                    Analyze Online Video Stream
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Mode 3: Local File Upload */}
+        {/* Mode 2: Local File Upload */}
         {activeTab === 'upload' && (
           <div>
             <input
@@ -516,6 +432,97 @@ export default function VideoInputView({
                   <>
                     <Play size={16} />
                     Initiate SafetyGuard Analysis
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mode 3: Direct Video Stream URL */}
+        {activeTab === 'url' && (
+          <div>
+            <div style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1e40af',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-sm)',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              fontSize: '0.82rem',
+              lineHeight: '1.5'
+            }}>
+              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong>Direct Video Stream Support:</strong> Paste any direct video stream URL (<code>.mp4</code>, <code>.webm</code>, AWS S3, GitHub raw, Cloudflare, CDN, or surveillance stream). Direct video streams download universally across all cloud servers with zero bot restrictions.
+              </div>
+            </div>
+
+            <div className="url-input-group">
+              <input
+                type="url"
+                className="url-input"
+                placeholder="https://example.com/cctv_footage.mp4"
+                value={videoUrl}
+                onChange={(e) => {
+                  setVideoUrl(e.target.value)
+                  if (fileError) setFileError('')
+                }}
+              />
+            </div>
+
+            {/* Quick Presets */}
+            <div style={{ marginTop: '0.75rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px' }}>
+                Quick Fill Direct Stream Links:
+              </span>
+              <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                {sampleUrlPresets.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '3px 8px',
+                      background: 'var(--bg-main)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '4px',
+                      color: 'var(--primary)',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => {
+                      setVideoUrl(preset.url)
+                      if (fileError) setFileError('')
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+              Supported formats: Direct MP4, WebM, MKV, AVI.
+            </div>
+
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                className="primary-btn"
+                disabled={isLoading || isJobRunning}
+                onClick={handleStartAnalysis}
+              >
+                {isLoading || isJobRunning ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Processing Pipeline...
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} />
+                    Analyze Video Stream
                   </>
                 )}
               </button>
