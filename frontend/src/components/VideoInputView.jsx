@@ -7,26 +7,91 @@ import {
   Play,
   CheckCircle,
   Loader2,
-  X
+  X,
+  Info,
+  Zap,
+  ShieldCheck,
+  ShieldAlert,
+  Film
 } from 'lucide-react'
 
 export default function VideoInputView({
   onStartUpload,
+  onStartURL,
+  onStartSample,
   onStartYouTube,
   activeJob,
   isLoading,
   error,
   onClearError
 }) {
-  const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'youtube'
+  const [activeTab, setActiveTab] = useState('samples') // 'samples' | 'url' | 'upload'
   const [selectedFile, setSelectedFile] = useState(null)
   const [fileError, setFileError] = useState('')
-  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [videoUrl, setVideoUrl] = useState('')
   const [dragActive, setDragActive] = useState(false)
   const fileInputRef = useRef(null)
 
   const allowedExtensions = ['.mp4', '.avi', '.mov', '.mkv', '.webm']
   const maxSizeBytes = 250 * 1024 * 1024 // 250MB
+
+  const sampleScenarios = [
+    {
+      id: 'brawl',
+      title: 'Subway Altercation & Brawl',
+      category: 'Violent Conflict',
+      severity: 'HIGH',
+      badgeColor: '#dc2626',
+      badgeBg: '#fef2f2',
+      description: 'Physical brawl in transit corridor with rapid motion jerk, chaotic spatial flow, and visual altercation.',
+      expected: 'High-Priority Threat Alert'
+    },
+    {
+      id: 'fall',
+      title: 'Escalator Slip & Fall Incident',
+      category: 'Slip & Fall Hazard',
+      severity: 'HIGH',
+      badgeColor: '#ea580c',
+      badgeBg: '#fff7ed',
+      description: 'Sudden vertical drop followed by post-fall person immobility. Flags rapid fall safety hazard.',
+      expected: 'Fall Hazard Detected'
+    },
+    {
+      id: 'patrol',
+      title: 'Hallway Security Patrol',
+      category: 'Normal Patrol',
+      severity: 'SAFE',
+      badgeColor: '#16a34a',
+      badgeBg: '#f0fdf4',
+      description: 'Routine security officer patrolling commercial hallway at steady pace. Safe baseline verification.',
+      expected: 'Safe Baseline (0 False Alarms)'
+    },
+    {
+      id: 'store',
+      title: 'Retail Store Counter',
+      category: 'Normal Commerce',
+      severity: 'SAFE',
+      badgeColor: '#16a34a',
+      badgeBg: '#f0fdf4',
+      description: 'Standard retail transaction and customer dialogue at checkout desk. Safe baseline verification.',
+      expected: 'Safe Baseline (0 False Alarms)'
+    }
+  ]
+
+  const sampleUrlPresets = [
+    {
+      label: 'CCTV Brawl Stream (MP4)',
+      url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_crime_altercation_brawl.mp4'
+    },
+    {
+      label: 'CCTV Slip & Fall Stream (MP4)',
+      url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_crime_slip_fall.mp4'
+    },
+    {
+      label: 'CCTV Safe Patrol Stream (MP4)',
+      url: 'https://raw.githubusercontent.com/rahultech-dom/AI-SafetyGuard/main/data/videos/cctv_normal_hallway_patrol.mp4'
+    }
+  ]
 
   const handleFileSelect = (file) => {
     setFileError('')
@@ -76,12 +141,24 @@ export default function VideoInputView({
         return
       }
       onStartUpload(selectedFile)
-    } else {
-      if (!youtubeUrl.trim()) {
-        setFileError('Please enter a YouTube video URL.')
+    } else if (activeTab === 'url') {
+      if (!videoUrl.trim()) {
+        setFileError('Please enter a video or YouTube stream URL.')
         return
       }
-      onStartYouTube(youtubeUrl.trim())
+      if (onStartURL) {
+        onStartURL(videoUrl.trim())
+      } else if (onStartYouTube) {
+        onStartYouTube(videoUrl.trim())
+      }
+    }
+  }
+
+  const handleRunSample = (sampleId) => {
+    if (onClearError) onClearError()
+    setFileError('')
+    if (onStartSample) {
+      onStartSample(sampleId)
     }
   }
 
@@ -91,11 +168,11 @@ export default function VideoInputView({
   const isJobRunning = activeJob && (activeJob.status === 'processing' || activeJob.status === 'queued')
 
   const stages = [
-    { label: 'Upload / Download', min: 0, max: 20 },
-    { label: 'Video Preprocessing', min: 20, max: 40 },
-    { label: 'Optical Flow & Motion', min: 40, max: 65 },
-    { label: 'Audio & Distress Words', min: 65, max: 85 },
-    { label: 'Multimodal Fusion & ML', min: 85, max: 100 },
+    { label: 'Video Acquisition', min: 0, max: 20 },
+    { label: 'Preprocessing & OpenCV', min: 20, max: 40 },
+    { label: 'Optical Flow & Jerk', min: 40, max: 65 },
+    { label: 'Audio & Distress Speech', min: 65, max: 85 },
+    { label: 'Multimodal Fusion & RF', min: 85, max: 100 },
   ]
 
   return (
@@ -142,24 +219,31 @@ export default function VideoInputView({
           Video Source Selection
         </h2>
         <p className="card-subtitle">
-          Submit CCTV footage, surveillance clips, or public YouTube streams for observable threat screening.
+          Screen surveillance footage, CCTV camera streams, or incident clips for physical altercation, slip & fall, or scream detection.
         </p>
 
         {/* Tab Selector */}
         <div className="input-tabs">
+          <button
+            className={`input-tab-btn ${activeTab === 'samples' ? 'active' : ''}`}
+            onClick={() => setActiveTab('samples')}
+          >
+            <Zap size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
+            1-Click CCTV Scenarios (Instant Demo)
+          </button>
+          <button
+            className={`input-tab-btn ${activeTab === 'url' ? 'active' : ''}`}
+            onClick={() => setActiveTab('url')}
+          >
+            <Globe size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
+            Web Video / Stream URL
+          </button>
           <button
             className={`input-tab-btn ${activeTab === 'upload' ? 'active' : ''}`}
             onClick={() => setActiveTab('upload')}
           >
             <UploadCloud size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
             Local Video File Upload
-          </button>
-          <button
-            className={`input-tab-btn ${activeTab === 'youtube' ? 'active' : ''}`}
-            onClick={() => setActiveTab('youtube')}
-          >
-            <Globe size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
-            Public YouTube Video Link
           </button>
         </div>
 
@@ -185,7 +269,190 @@ export default function VideoInputView({
           </div>
         )}
 
-        {/* Upload Mode */}
+        {/* Mode 1: 1-Click CCTV Demo Scenarios */}
+        {activeTab === 'samples' && (
+          <div>
+            <div style={{
+              fontSize: '0.85rem',
+              color: 'var(--text-secondary)',
+              marginBottom: '1rem',
+              lineHeight: 1.5
+            }}>
+              Select any pre-configured real-world CCTV benchmark clip below for an <strong>instant end-to-end demonstration</strong> of multimodal threat screening, dense optical flow tracking, and AI incident scoring. Works 100% reliably on all deployments.
+            </div>
+
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: '1rem',
+              marginBottom: '0.5rem'
+            }}>
+              {sampleScenarios.map((scen) => (
+                <div
+                  key={scen.id}
+                  style={{
+                    border: '1px solid var(--border-color)',
+                    borderRadius: 'var(--radius-md)',
+                    padding: '1rem',
+                    backgroundColor: 'var(--bg-main)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <span style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        textTransform: 'uppercase',
+                        padding: '3px 8px',
+                        borderRadius: '999px',
+                        color: scen.badgeColor,
+                        backgroundColor: scen.badgeBg,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}>
+                        {scen.severity === 'HIGH' ? <ShieldAlert size={12} /> : <ShieldCheck size={12} />}
+                        {scen.category}
+                      </span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                        CCTV Clip
+                      </span>
+                    </div>
+
+                    <h3 style={{ fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '6px' }}>
+                      {scen.title}
+                    </h3>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', lineHeight: 1.45, marginBottom: '12px' }}>
+                      {scen.description}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div style={{
+                      fontSize: '0.75rem',
+                      fontWeight: 500,
+                      color: scen.severity === 'HIGH' ? '#b91c1c' : '#15803d',
+                      marginBottom: '10px'
+                    }}>
+                      Expected: <strong>{scen.expected}</strong>
+                    </div>
+
+                    <button
+                      className="primary-btn"
+                      style={{ width: '100%', justifyContent: 'center', padding: '0.5rem 1rem', fontSize: '0.85rem' }}
+                      disabled={isLoading || isJobRunning}
+                      onClick={() => handleRunSample(scen.id)}
+                    >
+                      {isLoading || isJobRunning ? (
+                        <>
+                          <Loader2 size={14} className="animate-spin" />
+                          Processing...
+                        </>
+                      ) : (
+                        <>
+                          <Play size={14} />
+                          Run {scen.id === 'brawl' ? 'Brawl' : scen.id === 'fall' ? 'Fall' : 'Patrol'} Demo
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Mode 2: Universal Web Video / Stream URL */}
+        {activeTab === 'url' && (
+          <div>
+            <div style={{
+              backgroundColor: '#eff6ff',
+              border: '1px solid #bfdbfe',
+              color: '#1e40af',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-sm)',
+              marginBottom: '1rem',
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '10px',
+              fontSize: '0.82rem',
+              lineHeight: '1.5'
+            }}>
+              <Info size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div>
+                <strong>Universal Video Stream Support:</strong> Paste any direct video stream URL (<code>.mp4</code>, <code>.webm</code>, raw GitHub, AWS S3, Cloudflare, CDN, or surveillance stream) or a public YouTube link. Direct video streams download universally across all cloud servers with zero bot restrictions.
+              </div>
+            </div>
+
+            <div className="url-input-group">
+              <input
+                type="url"
+                className="url-input"
+                placeholder="https://example.com/cctv_footage.mp4 or https://www.youtube.com/watch?v=..."
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+            </div>
+
+            {/* Quick Presets */}
+            <div style={{ marginTop: '0.75rem' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-secondary)', marginRight: '8px' }}>
+                Quick Fill Stream Links:
+              </span>
+              <div style={{ display: 'inline-flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
+                {sampleUrlPresets.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '3px 8px',
+                      background: 'var(--bg-main)',
+                      border: '1px solid var(--border-color)',
+                      borderRadius: '4px',
+                      color: 'var(--primary)',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => setVideoUrl(preset.url)}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
+              Supported stream formats: Direct MP4, WebM, MKV, AVI, and standard YouTube video links.
+            </div>
+
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                className="primary-btn"
+                disabled={isLoading || isJobRunning}
+                onClick={handleStartAnalysis}
+              >
+                {isLoading || isJobRunning ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Processing Pipeline...
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} />
+                    Analyze Online Video Stream
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Mode 3: Local File Upload */}
         {activeTab === 'upload' && (
           <div>
             <input
@@ -233,47 +500,28 @@ export default function VideoInputView({
                 </button>
               </div>
             )}
+
+            <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
+              <button
+                className="primary-btn"
+                disabled={isLoading || isJobRunning}
+                onClick={handleStartAnalysis}
+              >
+                {isLoading || isJobRunning ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Processing Pipeline...
+                  </>
+                ) : (
+                  <>
+                    <Play size={16} />
+                    Initiate SafetyGuard Analysis
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
-
-        {/* YouTube Mode */}
-        {activeTab === 'youtube' && (
-          <div>
-            <div className="url-input-group">
-              <input
-                type="url"
-                className="url-input"
-                placeholder="https://www.youtube.com/watch?v=..."
-                value={youtubeUrl}
-                onChange={(e) => setYoutubeUrl(e.target.value)}
-              />
-            </div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
-              Only publicly accessible YouTube URLs are supported. Age-restricted, private, or copyrighted streams cannot be extracted.
-            </div>
-          </div>
-        )}
-
-        {/* Start Button */}
-        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
-          <button
-            className="primary-btn"
-            disabled={isLoading || isJobRunning}
-            onClick={handleStartAnalysis}
-          >
-            {isLoading || isJobRunning ? (
-              <>
-                <Loader2 size={16} className="animate-spin" />
-                Processing Pipeline...
-              </>
-            ) : (
-              <>
-                <Play size={16} />
-                Initiate SafetyGuard Analysis
-              </>
-            )}
-          </button>
-        </div>
       </div>
     </div>
   )

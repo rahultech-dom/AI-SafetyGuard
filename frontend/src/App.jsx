@@ -123,12 +123,12 @@ export default function App() {
     }
   }
 
-  // Handle YouTube analysis
-  const handleStartYouTube = async (url) => {
+  // Handle universal Video URL analysis (direct MP4/stream or YouTube)
+  const handleStartURL = async (url) => {
     setIsLoading(true)
     setError('')
     try {
-      const res = await fetch('/api/analyze/youtube', {
+      const res = await fetch('/api/analyze/url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url }),
@@ -136,7 +136,7 @@ export default function App() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.detail || `YouTube analysis failed with HTTP ${res.status}`)
+        throw new Error(errData.detail || `Video URL analysis failed with HTTP ${res.status}`)
       }
 
       const data = await res.json()
@@ -148,6 +148,35 @@ export default function App() {
       setIsLoading(false)
     }
   }
+
+  // Handle pre-loaded CCTV benchmark scenario
+  const handleStartSample = async (sampleId) => {
+    setIsLoading(true)
+    setError('')
+    try {
+      const res = await fetch('/api/analyze/sample', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sample_id: sampleId }),
+      })
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.detail || `Sample scenario failed with HTTP ${res.status}`)
+      }
+
+      const data = await res.json()
+      setActiveJobId(data.job_id)
+      fetchStats()
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // Backward-compatible alias
+  const handleStartYouTube = handleStartURL
 
   // Update human review decision
   const handleUpdateReview = async (jobId, incidentId, reviewStatus, humanNotes) => {
@@ -187,6 +216,8 @@ export default function App() {
         {currentTab === 'analyze' && (
           <VideoInputView
             onStartUpload={handleStartUpload}
+            onStartURL={handleStartURL}
+            onStartSample={handleStartSample}
             onStartYouTube={handleStartYouTube}
             activeJob={activeJob}
             isLoading={isLoading}

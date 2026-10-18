@@ -27,6 +27,14 @@ class YouTubeAnalyzeRequest(BaseModel):
     url: str
 
 
+class URLAnalyzeRequest(BaseModel):
+    url: str
+
+
+class SampleAnalyzeRequest(BaseModel):
+    sample_id: str
+
+
 class IncidentReviewUpdate(BaseModel):
     incident_id: str
     review_status: str  # e.g., "Confirmed Potential Incident", "False Positive / Safe Activity", "Needs Senior Review"
@@ -116,29 +124,122 @@ async def analyze_video_upload(file: UploadFile = File(...)) -> Dict[str, Any]:
     }
 
 
-@router.post("/analyze/youtube", status_code=status.HTTP_202_ACCEPTED)
-def analyze_youtube_video(req: YouTubeAnalyzeRequest) -> Dict[str, Any]:
-    """
-    Validate a public YouTube URL and queue download & analysis.
-    """
-    url = req.url.strip()
-    if not url:
-        raise HTTPException(status_code=400, detail="YouTube URL cannot be empty.")
+SAMPLE_BENCHMARKS = {
+    "brawl": {
+        "id": "brawl",
+        "title": "Subway Altercation & Brawl",
+        "filename": "cctv_crime_altercation_brawl.mp4",
+        "category": "Violent Conflict",
+        "severity": "HIGH",
+        "description": "Rapid physical altercation in a transit corridor with high jerk and chaotic motion.",
+        "expected_result": "High Severity Threat Flagged",
+    },
+    "fall": {
+        "id": "fall",
+        "title": "Escalator Slip & Fall Incident",
+        "filename": "cctv_crime_slip_fall.mp4",
+        "category": "Slip & Fall Hazard",
+        "severity": "HIGH",
+        "description": "Sudden vertical jerk followed by prolonged post-fall immobility.",
+        "expected_result": "Fall Hazard Detected",
+    },
+    "patrol": {
+        "id": "patrol",
+        "title": "Hallway Security Patrol",
+        "filename": "cctv_normal_hallway_patrol.mp4",
+        "category": "Normal Patrol",
+        "severity": "LOW",
+        "description": "Routine security guard walking through a commercial corridor.",
+        "expected_result": "Safe Baseline (0 False Alarms)",
+    },
+    "store": {
+        "id": "store",
+        "title": "Retail Store Counter",
+        "filename": "cctv_normal_store_counter.mp4",
+        "category": "Normal Commerce",
+        "severity": "LOW",
+        "description": "Standard customer interaction and transaction at a checkout desk.",
+        "expected_result": "Safe Baseline (0 False Alarms)",
+    },
+}
 
-    # Basic YouTube URL check
-    yt_regex = r"^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+$"
-    if not re.match(yt_regex, url):
-        raise HTTPException(status_code=400, detail="Invalid YouTube URL format.")
 
-    job_id = job_manager.create_job(job_type="youtube", source_path_or_url=url)
+@router.get("/samples")
+def get_sample_videos() -> Dict[str, Any]:
+    """Return available pre-loaded CCTV benchmark demo scenarios."""
+    samples = []
+    for s_id, s_info in SAMPLE_BENCHMARKS.items():
+        video_path = VIDEOS_DIR / s_info["filename"]
+        samples.append({
+            **s_info,
+            "available": video_path.is_file(),
+            "size_kb": round(video_path.stat().st_size / 1024, 1) if video_path.is_file() else 0,
+        })
+    return {"samples": samples}
+
+
+@router.post("/analyze/sample", status_code=status.HTTP_202_ACCEPTED)
+def analyze_sample_video(req: SampleAnalyzeRequest) -> Dict[str, Any]:
+    """
+    Queue analysis for a bundled CCTV benchmark scenario.
+    """
+    sample_id = req.sample_id.strip().lower()
+    if sample_id not in SAMPLE_BENCHMARKS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unknown sample '{sample_id}'. Available: {list(SAMPLE_BENCHMARKS.keys())}",
+        )
+
+    sample = SAMPLE_BENCHMARKS[sample_id]
+    video_path = VIDEOS_DIR / sample["filename"]
+    if not video_path.is_file():
+        raise HTTPException(status_code=404, detail=f"Sample video file '{sample['filename']}' not found on server.")
+
+    job_id = job_manager.create_job(job_type="sample", source_path_or_url=str(video_path))
+    job = job_manager.get_job(job_id)
+    if job:
+        job["video_title"] = sample["title"]
+        job_manager._persist_job(job_id)
+
     job_manager.start_analysis_job(job_id)
 
     return {
         "job_id": job_id,
         "status": JobStatus.QUEUED,
-        "message": "YouTube analysis job queued.",
+        "message": f"Sample benchmark '{sample['title']}' queued for analysis.",
+        "sample": sample,
+    }
+
+
+@router.post("/analyze/url", status_code=status.HTTP_202_ACCEPTED)
+def analyze_video_url(req: URLAnalyzeRequest) -> Dict[str, Any]:
+    """
+    Queue analysis from either a direct web video stream (MP4/WebM/etc) or YouTube URL.
+    """
+    url = req.url.strip()
+    if not url:
+        raise HTTPException(status_code=400, detail="Video URL cannot be empty.")
+
+    if not url.startswith("http://") and not url.startswith("https://"):
+        raise HTTPException(status_code=400, detail="URL must start with http:// or https://")
+
+    job_id = job_manager.create_job(job_type="url", source_path_or_url=url)
+    job_manager.start_analysis_job(job_id)
+
+    return {
+        "job_id": job_id,
+        "status": JobStatus.QUEUED,
+        "message": "Online video stream queued for analysis.",
         "url": url,
     }
+
+
+@router.post("/analyze/youtube", status_code=status.HTTP_202_ACCEPTED)
+def analyze_youtube_video(req: YouTubeAnalyzeRequest) -> Dict[str, Any]:
+    """
+    Backward-compatible YouTube endpoint that routes into the universal URL pipeline.
+    """
+    return analyze_video_url(URLAnalyzeRequest(url=req.url))
 
 
 @router.get("/jobs")

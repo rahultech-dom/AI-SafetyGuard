@@ -13,7 +13,7 @@ import pandas as pd
 
 from safetyguard.config import JOBS_DIR, OUTPUTS_DIR
 from safetyguard.video.processor import extract_video_features
-from safetyguard.video.youtube import download_youtube_video
+from safetyguard.video.downloader import download_any_video_url
 from safetyguard.audio.processor import (
     extract_audio_from_video,
     compute_acoustic_features,
@@ -172,11 +172,18 @@ class AnalysisJobManager:
             job_type = job["job_type"]
             source = job["source"]
 
-            if job_type == "youtube":
-                self.update_job(job_id, progress_pct=10.0, current_stage="Retrieving YouTube video with yt-dlp")
-                yt_info = download_youtube_video(source)
-                video_file = Path(yt_info["video_path"])
-                title = yt_info.get("title", video_file.name)
+            if job_type in ["youtube", "url"]:
+                def url_progress(pct: float, msg: str):
+                    overall_pct = 5.0 + (pct * 0.15)  # 5% -> 20%
+                    self.update_job(job_id, progress_pct=overall_pct, current_stage=msg)
+
+                self.update_job(job_id, progress_pct=8.0, current_stage="Retrieving video stream from URL")
+                dl_info = download_any_video_url(source, progress_callback=url_progress)
+                video_file = Path(dl_info["video_path"])
+                title = dl_info.get("title", video_file.name)
+            elif job_type == "sample":
+                video_file = Path(source)
+                title = job.get("video_title") or video_file.name
             else:
                 video_file = Path(source)
                 title = video_file.name

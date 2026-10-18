@@ -8,7 +8,9 @@ __pycache__/
 
 # Node
 frontend/node_modules/
-frontend/dist/
+frontend/.netlify/
+
+
 
 # Large binaries & media cache
 *.mp4
@@ -17,6 +19,8 @@ frontend/dist/
 *.wav
 *.webm
 !data/videos/test_walk.mp4
+!data/videos/cctv_*.mp4
+
 
 # Environment & local settings
 .env
